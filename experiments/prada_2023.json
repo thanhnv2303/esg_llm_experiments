@@ -1,0 +1,355 @@
+{
+  "dataset": {
+    "company": "PRADA S.P.A",
+    "industry": "fashion",
+    "year": 2023,
+    "document": "data/NFD/PRADA S.P.A/NFD2023.pdf",
+    "metadata": {
+      "language": "en",
+      "notes": "Official sustainability report PDF in Italian"
+    }
+  },
+  "tasks": [
+    {
+      "id": "prada_2023_total_purchased_raw_materials_p169",
+      "indicator": "total purchased parts",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 4000,
+        "unit": "tons"
+      },
+      "page": 169,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "total purchased raw materials",
+          "procured materials volume"
+        ],
+        "extra_instructions": "Focus on the total weight of primary raw materials purchased for products, excluding packaging."
+      }
+    },
+    {
+      "id": "prada_2023_recycled_plastic_used_p90",
+      "indicator": "recycled plastic used",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 300,
+        "unit": "tons"
+      },
+      "page": 90,
+      "expected": "higher",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "recycled plastic content",
+          "post-consumer recycled plastic"
+        ],
+        "extra_instructions": "Provide the total weight of recycled plastic purchased, specifically for packaging."
+      }
+    },
+    {
+      "id": "prada_2023_total_plastic_used_p169",
+      "indicator": "total plastic used",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 500,
+        "unit": "tons"
+      },
+      "page": 169,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "total plastic packaging weight",
+          "overall plastic consumption for packaging"
+        ],
+        "extra_instructions": "Focus on the total weight of plastic packaging purchased, including both virgin and recycled content."
+      }
+    },
+    {
+      "id": "prada_2023_energy_produced_res_self_consumption_p84",
+      "indicator": "energy produced from RES for self-consumption",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 3000000,
+        "unit": "kWh"
+      },
+      "page": 84,
+      "expected": "higher",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "self-generated renewable energy consumed",
+          "on-site renewable energy for own use"
+        ],
+        "extra_instructions": "Provide the amount of energy from renewable sources produced and consumed on-site by the company."
+      }
+    },
+    {
+      "id": "prada_2023_total_energy_consumed_p170",
+      "indicator": "total energy consumed",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 400000,
+        "unit": "GJ"
+      },
+      "page": 170,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "overall energy consumption",
+          "total energy use"
+        ],
+        "extra_instructions": "Report the total energy consumed from all sources, including electricity, natural gas, and fuel for the company fleet."
+      }
+    },
+    {
+      "id": "prada_2023_recyclable_packaging_p99",
+      "indicator": "recyclable packaging",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 95,
+        "unit": "percent"
+      },
+      "page": 99,
+      "expected": "higher",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "percentage of recyclable packaging",
+          "packaging designed for recycling"
+        ],
+        "extra_instructions": "Focus specifically on the percentage of plastic packaging that is fully recyclable."
+      }
+    },
+    {
+      "id": "prada_2023_total_packaging_p169",
+      "indicator": "total packaging",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 5500,
+        "unit": "tons"
+      },
+      "page": 169,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "total weight of packaging purchased",
+          "overall packaging consumption"
+        ],
+        "extra_instructions": "Provide the total weight of all packaging materials (plastic, paper, cardboard) purchased during the year."
+      }
+    },
+    {
+      "id": "prada_2023_ghg_emissions_p171",
+      "indicator": "GHG emissions",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 320000,
+        "unit": "tons of CO2e"
+      },
+      "page": 171,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "total greenhouse gas emissions",
+          "carbon footprint"
+        ],
+        "extra_instructions": "Report the total GHG emissions (Scope 1, 2, and 3) using the market-based method."
+      }
+    },
+    {
+      "id": "prada_2023_baseline_emissions_p163",
+      "indicator": "baseline emissions",
+      "benchmark": {
+        "source": "industry",
+        "year": 2019,
+        "value": 450000,
+        "unit": "tons of CO2e"
+      },
+      "page": 163,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "GHG emissions baseline",
+          "reference year emissions"
+        ],
+        "extra_instructions": "Identify the total market-based GHG emissions for the company's baseline year (2019)."
+      }
+    },
+    {
+      "id": "prada_2023_current_emissions_p170",
+      "indicator": "current emissions",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 15000,
+        "unit": "tons of CO2e"
+      },
+      "page": 170,
+      "expected": "lower",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "operational emissions",
+          "direct and indirect energy emissions"
+        ],
+        "extra_instructions": "Focus on the current year's Scope 1 and Scope 2 (market-based) emissions combined."
+      }
+    },
+    {
+      "id": "prada_2023_num_regenerated_components_p105",
+      "indicator": "number of regenerated components",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 500000,
+        "unit": "components"
+      },
+      "page": 105,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "re-generated parts",
+          "regenerated items"
+        ],
+        "extra_instructions": "Focus on the count of individual components made from regenerated materials like Re-Nylon."
+      }
+    },
+    {
+      "id": "prada_2023_weight_upcycled_materials_p106",
+      "indicator": "weight of upcycled materials",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 5,
+        "unit": "tons"
+      },
+      "page": 106,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "repurposed materials weight",
+          "upcycled fabric amount"
+        ],
+        "extra_instructions": "Find the total weight of materials used in initiatives like 'Upcycled by Miu Miu'."
+      }
+    },
+    {
+      "id": "prada_2023_num_repaired_components_p111",
+      "indicator": "number of repaired components",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 100000,
+        "unit": "repairs"
+      },
+      "page": 111,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "items repaired",
+          "repaired products count"
+        ],
+        "extra_instructions": "Find the total count of customer products repaired by the global network of repair labs."
+      }
+    },
+    {
+      "id": "prada_2023_power_res_plants_p84",
+      "indicator": "power of RES plants",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 5,
+        "unit": "MWp"
+      },
+      "page": 84,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "renewable energy installed capacity",
+          "photovoltaic plant power"
+        ],
+        "extra_instructions": "Look for the total installed power capacity of the photovoltaic systems, usually in MW or kWp."
+      }
+    },
+    {
+      "id": "prada_2023_co2_captured_p75",
+      "indicator": "CO2 captured",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 100,
+        "unit": "tons"
+      },
+      "page": 75,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "carbon capture volume",
+          "sequestered CO2"
+        ],
+        "extra_instructions": "Focus on any mention of carbon capture and storage (CCS) technologies and the amount of CO2 sequestered."
+      }
+    },
+    {
+      "id": "prada_2023_co2_reused_p75",
+      "indicator": "CO2 reused",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 10,
+        "unit": "tons"
+      },
+      "page": 75,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "re-used carbon dioxide",
+          "recycled CO2"
+        ],
+        "extra_instructions": "Look for any mention of carbon capture and utilization (CCU) and the amount of CO2 being reused in other processes."
+      }
+    },
+    {
+      "id": "prada_2023_recovered_water_p102",
+      "indicator": "recovered water",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 50000,
+        "unit": "m3"
+      },
+      "page": 102,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "reclaimed water volume",
+          "reused water"
+        ],
+        "extra_instructions": "Find the total volume of water recovered through systems like rainwater harvesting or closed-loop circuits."
+      }
+    },
+    {
+      "id": "prada_2023_compostable_packaging_p98",
+      "indicator": "compostable packaging",
+      "benchmark": {
+        "source": "industry",
+        "year": 2023,
+        "value": 50,
+        "unit": "tons"
+      },
+      "page": 98,
+      "expected": "not found",
+      "prompt_overrides": {
+        "indicator_synonyms": [
+          "biodegradable packaging"
+        ],
+        "extra_instructions": "Search for the total weight or percentage of packaging materials that are certified as compostable."
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Optional dependency for PDF processing (install if you prefer PyMuPDF over Poppler tools)
+pymupdf>=1.23.7
+requests>=2.31.0
+groq

@@ -1,0 +1,148 @@
+indicator,unit,year,value
+Number of regenerated components,components,2018,3000
+Number of regenerated components,components,2019,5000
+Number of regenerated components,components,2020,6500
+Number of regenerated components,components,2021,8000
+Number of regenerated components,components,2022,10000
+Number of regenerated components,components,2023,12000
+Number of regenerated components,components,2024,14000
+Weight of upcycled materials,tons,2018,1200
+Weight of upcycled materials,tons,2019,1800
+Weight of upcycled materials,tons,2020,2200
+Weight of upcycled materials,tons,2021,2500
+Weight of upcycled materials,tons,2022,3200
+Weight of upcycled materials,tons,2023,4500
+Weight of upcycled materials,tons,2024,5800
+Number of repaired components,components,2018,6000
+Number of repaired components,components,2019,8000
+Number of repaired components,components,2020,10000
+Number of repaired components,components,2021,12000
+Number of repaired components,components,2022,14000
+Number of repaired components,components,2023,18000
+Number of repaired components,components,2024,22000
+Reused parts,parts,2018,500000
+Reused parts,parts,2019,800000
+Reused parts,parts,2020,1000000
+Reused parts,parts,2021,1200000
+Reused parts,parts,2022,1800000
+Reused parts,parts,2023,2500000
+Reused parts,parts,2024,3300000
+Total purchased parts,parts,2018,12000000
+Total purchased parts,parts,2019,11800000
+Total purchased parts,parts,2020,11500000
+Total purchased parts,parts,2021,11000000
+Total purchased parts,parts,2022,11000000
+Total purchased parts,parts,2023,11500000
+Total purchased parts,parts,2024,12000000
+Recycled plastic used,tons,2018,200
+Recycled plastic used,tons,2019,400
+Recycled plastic used,tons,2020,600
+Recycled plastic used,tons,2021,800
+Recycled plastic used,tons,2022,1000
+Recycled plastic used,tons,2023,1200
+Recycled plastic used,tons,2024,1600
+Total plastic used,tons,2018,7500
+Total plastic used,tons,2019,7200
+Total plastic used,tons,2020,6800
+Total plastic used,tons,2021,6000
+Total plastic used,tons,2022,5800
+Total plastic used,tons,2023,5000
+Total plastic used,tons,2024,4500
+Energy from RES (self-use),GWh,2018,5
+Energy from RES (self-use),GWh,2019,12
+Energy from RES (self-use),GWh,2020,18
+Energy from RES (self-use),GWh,2021,25
+Energy from RES (self-use),GWh,2022,32
+Energy from RES (self-use),GWh,2023,45
+Energy from RES (self-use),GWh,2024,60
+Total energy consumed,GWh,2018,420
+Total energy consumed,GWh,2019,415
+Total energy consumed,GWh,2020,410
+Total energy consumed,GWh,2021,400
+Total energy consumed,GWh,2022,390
+Total energy consumed,GWh,2023,380
+Total energy consumed,GWh,2024,370
+Power of RES plants,MW,2018,40
+Power of RES plants,MW,2019,55
+Power of RES plants,MW,2020,70
+Power of RES plants,MW,2021,80
+Power of RES plants,MW,2022,100
+Power of RES plants,MW,2023,120
+Power of RES plants,MW,2024,150
+Total plant power,MW,2018,200
+Total plant power,MW,2019,220
+Total plant power,MW,2020,240
+Total plant power,MW,2021,250
+Total plant power,MW,2022,280
+Total plant power,MW,2023,310
+Total plant power,MW,2024,330
+CO2 captured,tons,2018,1000
+CO2 captured,tons,2019,3000
+CO2 captured,tons,2020,5000
+CO2 captured,tons,2021,8000
+CO2 captured,tons,2022,10000
+CO2 captured,tons,2023,15000
+CO2 captured,tons,2024,20000
+CO2 reused,percent,2018,0.01
+CO2 reused,percent,2019,0.03
+CO2 reused,percent,2020,0.04
+CO2 reused,percent,2021,0.05
+CO2 reused,percent,2022,0.07
+CO2 reused,percent,2023,0.10
+CO2 reused,percent,2024,0.14
+Recovered water,m3,2018,60000
+Recovered water,m3,2019,90000
+Recovered water,m3,2020,120000
+Recovered water,m3,2021,150000
+Recovered water,m3,2022,180000
+Recovered water,m3,2023,220000
+Recovered water,m3,2024,270000
+Recyclable packaging,percent_of_total,2018,0.60
+Recyclable packaging,percent_of_total,2019,0.65
+Recyclable packaging,percent_of_total,2020,0.72
+Recyclable packaging,percent_of_total,2021,0.80
+Recyclable packaging,percent_of_total,2022,0.85
+Recyclable packaging,percent_of_total,2023,0.95
+Recyclable packaging,percent_of_total,2024,0.98
+Total packaging,tons,2018,10000
+Total packaging,tons,2019,9800
+Total packaging,tons,2020,9500
+Total packaging,tons,2021,9000
+Total packaging,tons,2022,8800
+Total packaging,tons,2023,8500
+Total packaging,tons,2024,8200
+Compostable packaging,tons,2018,50
+Compostable packaging,tons,2019,150
+Compostable packaging,tons,2020,300
+Compostable packaging,tons,2021,500
+Compostable packaging,tons,2022,800
+Compostable packaging,tons,2023,1200
+Compostable packaging,tons,2024,1600
+Reintegrated post-consumption materials,tons,2018,100
+Reintegrated post-consumption materials,tons,2019,180
+Reintegrated post-consumption materials,tons,2020,250
+Reintegrated post-consumption materials,tons,2021,300
+Reintegrated post-consumption materials,tons,2022,450
+Reintegrated post-consumption materials,tons,2023,650
+Reintegrated post-consumption materials,tons,2024,900
+GHG emissions,Mt CO2e,2018,2.8
+GHG emissions,Mt CO2e,2019,2.7
+GHG emissions,Mt CO2e,2020,2.6
+GHG emissions,Mt CO2e,2021,2.5
+GHG emissions,Mt CO2e,2022,2.3
+GHG emissions,Mt CO2e,2023,2.1
+GHG emissions,Mt CO2e,2024,1.9
+Baseline emissions (fixed 2020),Mt CO2e,2018,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2019,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2020,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2021,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2022,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2023,2.6
+Baseline emissions (fixed 2020),Mt CO2e,2024,2.6
+Current emissions,Mt CO2e,2018,2.8
+Current emissions,Mt CO2e,2019,2.7
+Current emissions,Mt CO2e,2020,2.6
+Current emissions,Mt CO2e,2021,2.3
+Current emissions,Mt CO2e,2022,2.2
+Current emissions,Mt CO2e,2023,1.9
+Current emissions,Mt CO2e,2024,1.8
