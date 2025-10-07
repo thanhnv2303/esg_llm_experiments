@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import requests
 
@@ -47,18 +47,34 @@ class OpenAICompatibleModel(ModelRunner):
         prompt: str,
         page_image: Optional[Path] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[List[Path]] = None,
     ) -> ModelResponse:
         content = [{"type": "text", "text": prompt}]
 
         if page_text:
             content.append({"type": "text", "text": f"\nExtracted page text:\n{page_text}"})
 
+        images_to_encode: List[Path] = []
         if page_image and page_image.exists():
+            images_to_encode.append(page_image)
+        if page_images:
+            for candidate in page_images:
+                if candidate and candidate.exists():
+                    images_to_encode.append(candidate)
+
+        unique_paths: List[Path] = []
+        seen: set[Path] = set()
+        for path in images_to_encode:
+            if path not in seen:
+                unique_paths.append(path)
+                seen.add(path)
+
+        for path in unique_paths:
             try:
-                encoded = encode_image(page_image)
+                encoded = encode_image(path)
                 content.append({"type": "image_url", "image_url": {"url": encoded}})
             except Exception as exc:  # pragma: no cover - depends on filesystem
-                LOGGER.warning("Failed to encode image %s: %s", page_image, exc)
+                LOGGER.warning("Failed to encode image %s: %s", path, exc)
 
         payload: Dict[str, object] = {
             "model": self.model,

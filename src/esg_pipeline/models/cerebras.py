@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import requests
 
@@ -49,6 +49,7 @@ class CerebrasModel(ModelRunner):
         prompt: str,
         page_text: Optional[str],
         page_image: Optional[Path],
+        page_images: Optional[List[Path]],
     ) -> str:
         prompt = prompt.strip()
         if page_text:
@@ -58,6 +59,11 @@ class CerebrasModel(ModelRunner):
                 "Cerebras chat completions currently do not accept image inputs; ignoring %s",
                 page_image,
             )
+        if page_images:
+            LOGGER.warning(
+                "Cerebras chat completions currently do not accept image inputs; ignoring %d referenced images",
+                len(page_images),
+            )
         return prompt
 
     def predict(
@@ -65,8 +71,9 @@ class CerebrasModel(ModelRunner):
         prompt: str,
         page_image: Optional[Path] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[List[Path]] = None,
     ) -> ModelResponse:
-        user_prompt = self._build_prompt(prompt, page_text, page_image)
+        user_prompt = self._build_prompt(prompt, page_text, page_image, page_images)
 
         payload: Dict[str, object] = {
             "model": self.model,

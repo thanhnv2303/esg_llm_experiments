@@ -222,6 +222,24 @@ def parse_args() -> argparse.Namespace:
         help="Safety setting override for Google Generative AI (can be repeated).",
     )
     parser.add_argument(
+        "--pdf-extractor",
+        choices=["pymupdf", "docling"],
+        default="docling",
+        help=(
+            "PDF extraction backend. 'pymupdf' keeps the existing PyMuPDF/Poppler pipeline. "
+            "'docling' converts the page to Markdown using Docling."
+        ),
+    )
+    parser.add_argument(
+        "--docling-image-mode",
+        choices=["embedded", "referenced"],
+        default="referenced",
+        help=(
+            "When using --pdf-extractor=docling, choose whether images are embedded as data URIs "
+            "in the Markdown or exported as separate files referenced from the Markdown."
+        ),
+    )
+    parser.add_argument(
         "--no-images",
         action="store_true",
         help="Skip page image extraction during preprocessing.",
@@ -236,7 +254,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Resume an interrupted run by skipping tasks with existing responses.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.pdf_extractor == "docling" and args.no_text:
+        parser.error("Docling extractor requires page text capture. Remove --no-text to continue.")
+
+    return args
 
 
 def parse_extra_headers(values: list[str] | None) -> dict[str, str]:
@@ -383,6 +406,8 @@ def main() -> None:
         artifacts_dir=args.artifacts,
         capture_images=not args.no_images,
         capture_text=not args.no_text,
+        pdf_extractor=args.pdf_extractor,
+        docling_image_mode=args.docling_image_mode,
     )
 
     results = runner.run(

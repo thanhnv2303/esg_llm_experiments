@@ -38,7 +38,8 @@ Helper functions in `src/esg_pipeline/benchmarks.py` expose these values to the 
 1. Ensure required Python packages and external tools are available:
    - Python 3.10+
    - Install dependencies with `pip install -r requirements.txt`
-   - **Either** [`PyMuPDF`](https://pymupdf.readthedocs.io/) **or** Poppler utilities (`pdftoppm`/`pdftotext`) on your `PATH` for PDF preprocessing.
+   - For the default pipeline, install [`PyMuPDF`](https://pymupdf.readthedocs.io/) or ensure Poppler utilities (`pdftoppm`/`pdftotext`) are on your `PATH`.
+   - Optional: install [`docling`](https://github.com/ibm/docling) to enable Markdown-based extraction (`pip install docling`).
 2. Activate your virtual environment if needed (not created automatically).
 3. Execute the CLI with an experiment definition:
 
@@ -56,6 +57,10 @@ Key switches:
 - `--benchmarks PATH`, `--artifacts DIR`, and `--experiment-id NAME` adjust inputs and artifact locations.
 - `--no-images` / `--no-text` skip respective preprocessing stages when the downstream model does not need them.
 - `--resume` skips tasks that already have saved responses under the target artifacts directory, letting you continue an interrupted run.
+- `--pdf-extractor {pymupdf,docling}` selects the PDF preprocessing backend. `docling` converts each page to Markdown and can optionally export detected figures/tables as separate images.
+- `--docling-image-mode {embedded,referenced}` controls how Docling handles images: `embedded` inlines them as base64 inside the Markdown (no page screenshots are generated), while `referenced` saves crops to `images/<task>_assets/`, renders a combined figure with path captions, and sends that single composite image to the model.
+
+When running with `--pdf-extractor=docling --docling-image-mode=referenced`, the pipeline saves the Markdown page under `texts/` (with a `.md` extension) and the associated crops under `images/<task>_assets/`. These additional images are supplied to vision-capable models alongside the primary page screenshot.
 
 Set your API key via `--api-key`, `--groq-api-key`, `--cerebras-api-key`, or the corresponding environment variables (defaults `OPENAI_API_KEY`, `GROQ_API_KEY`, and `CEREBRAS_API_KEY`). Additional HTTP headers for self-hosted gateways can be supplied with repeated `--extra-header KEY=VALUE` arguments.
 

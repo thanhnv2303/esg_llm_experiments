@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 PredictionLabel = Literal["higher", "lower", "equal", "not found"]
 
@@ -24,6 +24,7 @@ class ModelRunner(ABC):
         prompt: str,
         page_image: Optional[Path] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[List[Path]] = None,
     ) -> ModelResponse:
         """Run the model on the supplied prompt and page context."""
 

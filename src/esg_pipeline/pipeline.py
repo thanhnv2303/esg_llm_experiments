@@ -3,16 +3,21 @@ from __future__ import annotations
 import json
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Literal
 
 from .benchmarks import BenchmarkRecord, BenchmarkRepository
 from .config import ExperimentConfig, TaskConfig
 from .models.base import ModelRunner, PredictionLabel
 from .models._shared import normalise_label
-from .preprocessing import extract_page_as_image, extract_page_as_text
+from .preprocessing import (
+    DoclingImageMode,
+    extract_page_as_image,
+    extract_page_as_text,
+    extract_page_with_docling,
+)
 from .prompting import build_prompt, format_benchmark_value
 
 LOGGER = logging.getLogger(__name__)
@@ -35,6 +40,8 @@ class TaskRunResult:
     image_path: Optional[Path]
     text_path: Optional[Path]
     raw_response_path: Path
+    image_paths: List[Path] = field(default_factory=list)
+    combined_image_path: Optional[Path] = None
 
     def to_table_row(self) -> dict:
         return {
@@ -135,12 +142,16 @@ class ExperimentRunner:
         artifacts_dir: Path = Path("artifacts"),
         capture_images: bool = True,
         capture_text: bool = True,
+        pdf_extractor: Literal["pymupdf", "docling"] = "pymupdf",
+        docling_image_mode: DoclingImageMode = "embedded",
     ) -> None:
         self.benchmark_repo = benchmark_repo
         self.model = model
         self.artifacts_dir = artifacts_dir
         self.capture_images = capture_images
         self.capture_text = capture_text
+        self.pdf_extractor = pdf_extractor
+        self.docling_image_mode = docling_image_mode
 
     def run(
         self,
@@ -188,7 +199,8 @@ class ExperimentRunner:
             prompt_path.write_text(prompt, encoding="utf-8")
 
             image_path: Optional[Path] = None
-            if self.capture_images:
+            should_capture_primary_image = self.capture_images and self.pdf_extractor != "docling"
+            if should_capture_primary_image:
                 try:
                     image_path = extract_page_as_image(
                         config.dataset.document,
@@ -201,15 +213,81 @@ class ExperimentRunner:
 
             text_path: Optional[Path] = None
             page_text: Optional[str] = None
-            if self.capture_text:
-                try:
-                    page_text = extract_page_as_text(config.dataset.document, task.page)
-                    text_path = text_dir / f"{task.id}.txt"
-                    text_path.write_text(page_text, encoding="utf-8")
-                except Exception as exc:  # pragma: no cover - depends on system
-                    LOGGER.warning("Failed to extract text for task %s: %s", task.id, exc)
+            asset_images: List[Path] = []
+            combined_image: Optional[Path] = None
 
-            response = self.model.predict(prompt, page_image=image_path, page_text=page_text)
+            if self.pdf_extractor == "docling":
+                assets_dir: Optional[Path] = None
+                if self.docling_image_mode == "referenced":
+                    assets_dir = images_dir / f"{task.id}_assets"
+                    assets_dir.mkdir(parents=True, exist_ok=True)
+                    # Clear previous remnants when rerunning tasks
+                    for leftover in assets_dir.iterdir():
+                        if leftover.is_file():
+                            leftover.unlink()
+                try:
+                    artifacts = extract_page_with_docling(
+                        config.dataset.document,
+                        task.page,
+                        markdown_dir=text_dir,
+                        images_dir=assets_dir,
+                        image_mode=self.docling_image_mode,
+                        filename_prefix=f"{task.id}"
+                    )
+                    page_text = artifacts.markdown_text
+                    asset_images = artifacts.image_paths
+                    combined_image = artifacts.combined_image_path
+                    if self.capture_text:
+                        text_path = artifacts.markdown_path
+                    else:
+                        try:
+                            artifacts.markdown_path.unlink(missing_ok=True)
+                        except OSError:
+                            LOGGER.debug(
+                                "Failed to remove temporary markdown for task %s", task.id,
+                                exc_info=True,
+                            )
+                except Exception as exc:  # pragma: no cover - depends on optional dependency
+                    LOGGER.warning(
+                        "Docling extraction failed for task %s: %s", task.id, exc
+                    )
+                    raise exc
+                    # if self.capture_text:
+                    #     try:
+                    #         page_text = extract_page_as_text(
+                    #             config.dataset.document, task.page
+                    #         )
+                    #         text_path = text_dir / f"{task.id}.txt"
+                    #         text_path.write_text(page_text, encoding="utf-8")
+                    #     except Exception as fallback_exc:  # pragma: no cover - system dependent
+                    #         LOGGER.warning(
+                    #             "Fallback text extraction failed for task %s: %s",
+                    #             task.id,
+                    #             fallback_exc,
+                    #         )
+            else:
+                if self.capture_text:
+                    try:
+                        page_text = extract_page_as_text(config.dataset.document, task.page)
+                        text_path = text_dir / f"{task.id}.txt"
+                        text_path.write_text(page_text, encoding="utf-8")
+                    except Exception as exc:  # pragma: no cover - depends on system
+                        LOGGER.warning(
+                            "Failed to extract text for task %s: %s", task.id, exc
+                        )
+
+            images_for_model: List[Path] = []
+            if combined_image and combined_image.exists():
+                images_for_model.append(combined_image)
+            elif asset_images:
+                images_for_model.extend(path for path in asset_images if path.exists())
+
+            response = self.model.predict(
+                prompt,
+                page_image=image_path,
+                page_text=page_text,
+                page_images=images_for_model or None,
+            )
             predicted_value = _extract_extracted_value(response.raw_response)
             response_path = responses_dir / f"{task.id}.json"
             response_payload = {
@@ -247,6 +325,8 @@ class ExperimentRunner:
                 image_path=image_path,
                 text_path=text_path,
                 raw_response_path=raw_text_path,
+                image_paths=asset_images,
+                combined_image_path=combined_image,
             )
             results.append(result)
         self._persist_table(results, experiment_dir)
@@ -333,9 +413,21 @@ class ExperimentRunner:
             if not image_path.exists():
                 image_path = None
 
-            text_path = text_dir / f"{task.id}.txt"
-            if not text_path.exists():
-                text_path = None
+            image_assets_dir = images_dir / f"{task.id}_assets"
+            image_paths: List[Path] = []
+            combined_image_path: Optional[Path] = None
+            if image_assets_dir.exists():
+                for asset_path in sorted(path for path in image_assets_dir.iterdir() if path.is_file()):
+                    if asset_path.name.endswith("_combined.png") and combined_image_path is None:
+                        combined_image_path = asset_path
+                    else:
+                        image_paths.append(asset_path)
+
+            text_candidates = [
+                text_dir / f"{task.id}.md",
+                text_dir / f"{task.id}.txt",
+            ]
+            text_path = next((candidate for candidate in text_candidates if candidate.exists()), None)
 
             label_value = payload.get("label")
             if isinstance(label_value, str):
@@ -376,6 +468,8 @@ class ExperimentRunner:
                 image_path=image_path,
                 text_path=text_path,
                 raw_response_path=raw_response_path,
+                image_paths=image_paths,
+                combined_image_path=combined_image_path,
             )
 
         return existing

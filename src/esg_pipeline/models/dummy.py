@@ -15,6 +15,7 @@ class DummyModel(ModelRunner):
         prompt: str,
         page_image: Optional[object] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[list] = None,
     ) -> ModelResponse:
         response_text = (
             f"Model {self.name} received prompt of length {len(prompt)}. Returning default label {self.default_label}."

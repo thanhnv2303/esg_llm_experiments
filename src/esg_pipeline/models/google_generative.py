@@ -51,18 +51,34 @@ class GoogleGenerativeModel(ModelRunner):
         prompt: str,
         page_image: Optional[Path] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[List[Path]] = None,
     ) -> ModelResponse:
         parts: List[Dict[str, object]] = [{"text": prompt}]
 
         if page_text:
             parts.append({"text": f"\nExtracted page text:\n{page_text}"})
 
+        image_candidates: List[Path] = []
         if page_image and page_image.exists():
+            image_candidates.append(page_image)
+        if page_images:
+            for candidate in page_images:
+                if candidate and candidate.exists():
+                    image_candidates.append(candidate)
+
+        unique_paths: List[Path] = []
+        seen: set[Path] = set()
+        for path in image_candidates:
+            if path not in seen:
+                unique_paths.append(path)
+                seen.add(path)
+
+        for path in unique_paths:
             try:
-                mime_type, encoded = encode_image_inline(page_image)
+                mime_type, encoded = encode_image_inline(path)
                 parts.append({"inline_data": {"mime_type": mime_type, "data": encoded}})
             except Exception as exc:  # pragma: no cover - depends on filesystem
-                LOGGER.warning("Failed to encode image %s: %s", page_image, exc)
+                LOGGER.warning("Failed to encode image %s: %s", path, exc)
 
         payload: Dict[str, object] = {
             "contents": [

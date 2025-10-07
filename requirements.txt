@@ -1,4 +1,6 @@
 # Optional dependency for PDF processing (install if you prefer PyMuPDF over Poppler tools)
 pymupdf>=1.23.7
+# Optional Docling extractor support (install manually if you use --pdf-extractor=docling)
+# docling>=2.4.2
 requests>=2.31.0
 groq

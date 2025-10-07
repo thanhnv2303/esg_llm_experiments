@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import requests
 
@@ -49,6 +49,7 @@ class GroqModel(ModelRunner):
         prompt: str,
         page_image: Optional[Path] = None,
         page_text: Optional[str] = None,
+        page_images: Optional[List[Path]] = None,
     ) -> ModelResponse:
         content_chunks = [prompt.strip()]
 
@@ -59,6 +60,11 @@ class GroqModel(ModelRunner):
             LOGGER.debug(
                 "Groq chat completions currently do not support image inputs; ignoring %s",
                 page_image,
+            )
+        if page_images:
+            LOGGER.debug(
+                "Groq chat completions currently do not support image inputs; ignoring %d referenced images",
+                len(page_images),
             )
 
         combined_content = "\n\n".join(chunk for chunk in content_chunks if chunk)
