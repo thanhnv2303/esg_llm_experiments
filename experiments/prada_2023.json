@@ -3,7 +3,7 @@
     "company": "PRADA S.P.A",
     "industry": "fashion",
     "year": 2023,
-    "document": "data/NFD/PRADA S.P.A/NFD2023.pdf",
+    "document": "/home/thanhnv/polito_local/source/thesis/esg_test/data/NFD/PRADA S.P.A/NFD2023.pdf",
     "metadata": {
       "language": "en",
       "notes": "Official sustainability report PDF in Italian"

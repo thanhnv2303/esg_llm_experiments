@@ -1,0 +1,72 @@
+{
+  "rag_anything": {
+    "working_dir": "artifacts/rag_storage",
+    "parser": "docling",
+    "parse_method": "auto",
+    "enable_image_processing": true,
+    "enable_table_processing": true,
+    "enable_equation_processing": false
+  },
+  "llm": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "api_base": "https://api.openai.com",
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "api_key": "REPLACE_WITH_OPENAI_KEY"
+  },
+  "embedding": {
+    "model": "text-embedding-3-large",
+    "embedding_dim": 3072,
+    "max_token_size": 8192,
+    "api_key": "REPLACE_WITH_OPENAI_KEY",
+    "input_type": "document",
+    "extra_params": {
+      "input_type": "passage",
+      "extra_body": {
+        "truncate": "NONE"
+      }
+    }
+  },
+  "vision_model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "api_key": "REPLACE_WITH_OPENAI_KEY"
+  },
+  "lightrag": {
+    "vector_storage": "NanoVectorDBStorage",
+    "kv_storage": "JsonKVStorage",
+    "graph_storage": "NetworkXStorage",
+    "doc_status_storage": "JsonDocStatusStorage",
+    "chunk_token_size": 256,
+    "chunk_overlap_token_size": 48
+  },
+  "document_processing": {
+    "parse_method": "auto",
+    "display_stats": false,
+    "device": "cuda:0",
+    "doc_id": "prada_2023_subset",
+    "restrict_to_experiment_pages": true,
+    "experiment_page_padding": 1,
+    "page_ranges": [
+      {
+        "start": 80,
+        "end": 120
+      }
+    ],
+    "extra_pages": [
+      169,
+      170
+    ],
+    "clear_existing_document": true,
+    "split_by_character": "\\n\\n",
+    "parser_kwargs": {}
+  },
+  "query": {
+    "mode": "hybrid",
+    "use_multimodal": true,
+    "params": {
+      "temperature": 0.0
+    }
+  }
+}

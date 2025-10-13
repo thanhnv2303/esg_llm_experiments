@@ -5,10 +5,14 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 ROOT_DIR = Path(__file__).parent.resolve()
 SRC_DIR = ROOT_DIR / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+
+load_dotenv(dotenv_path=ROOT_DIR / ".env", override=False)
 
 from esg_pipeline import (  # noqa: E402
     BenchmarkRepository,
@@ -18,6 +22,8 @@ from esg_pipeline import (  # noqa: E402
     GoogleGenerativeModel,
     GroqModel,
     OpenAICompatibleModel,
+    RAGAnythingModel,
+    RAGAnythingPipelineConfig,
     load_experiment,
 )
 
@@ -50,9 +56,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model-backend",
-        choices=["dummy", "openai", "google", "groq", "cerebras"],
+        choices=["dummy", "openai", "google", "groq", "cerebras", "rag-anything"],
         default="dummy",
         help="Model backend to use when running the experiment.",
+    )
+    parser.add_argument(
+        "--rag-config",
+        type=Path,
+        default=None,
+        help="Path to a RAG-Anything configuration file (JSON). Required when --model-backend=rag-anything.",
     )
     parser.add_argument(
         "--dummy-label",
@@ -366,6 +378,14 @@ def build_model(args: argparse.Namespace):
             retry_wait_seconds=args.retry_wait,
         )
 
+    if args.model_backend == "rag-anything":
+        if args.rag_config is None:
+            raise ValueError(
+                "RAG-Anything backend requires --rag-config pointing to the pipeline configuration JSON."
+            )
+        rag_config = RAGAnythingPipelineConfig.from_json(args.rag_config)
+        return RAGAnythingModel(config=rag_config, artifacts_dir=args.artifacts)
+
     if args.model_backend == "cerebras":
         api_key = (
             args.cerebras_api_key
@@ -400,6 +420,10 @@ def main() -> None:
     experiment = load_experiment(args.experiment)
 
     model = build_model(args)
+
+    if hasattr(model, "prepare_dataset"):
+        model.prepare_dataset(experiment)
+
     runner = ExperimentRunner(
         benchmark_repo=benchmark_repo,
         model=model,

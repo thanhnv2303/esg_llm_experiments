@@ -184,3 +184,6 @@ fabric.properties
 .idea
 data
 artifacts
+configs/rag_anything.json
+local/configs
+output
