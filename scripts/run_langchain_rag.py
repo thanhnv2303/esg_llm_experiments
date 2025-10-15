@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -142,6 +143,35 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=4)
     parser.add_argument("--embedding-dimension", type=int, default=768)
     parser.add_argument(
+        "--embedding-backend",
+        type=str,
+        default="hash",
+        choices=[
+            "hash",
+            "hashing",
+            "huggingface",
+            "hf",
+            "sentence-transformers",
+            "openai",
+            "openai-embeddings",
+            "azure-openai",
+        ],
+        help="Embedding backend used to build the LangChain vector store.",
+    )
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default=None,
+        help="Embedding model identifier passed to the selected backend.",
+    )
+    parser.add_argument(
+        "--embedding-option",
+        action="append",
+        default=None,
+        metavar="KEY=VALUE",
+        help="Additional keyword argument forwarded to the embedding backend.",
+    )
+    parser.add_argument(
         "--include-all-pages",
         action="store_true",
         help="Index every PDF page instead of limiting to task pages.",
@@ -160,6 +190,167 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="\n\n---\n\n",
         help="Separator string between retrieved chunks in the context file.",
+    )
+    parser.add_argument(
+        "--save-chunks",
+        action="store_true",
+        help="Persist chunked documents to a temporary directory for inspection.",
+    )
+    parser.add_argument(
+        "--chunk-dump-dir",
+        type=Path,
+        default=None,
+        help="Optional directory where chunked documents should be saved. A subfolder per run will be created inside this path.",
+    )
+    parser.add_argument(
+        "--disable-table-extraction",
+        action="store_true",
+        help="Skip table extraction and rely solely on text chunks.",
+    )
+    parser.add_argument(
+        "--table-row-chunk-size",
+        type=int,
+        default=20,
+        help="Maximum number of table rows per chunk when linearising large tables.",
+    )
+    parser.add_argument(
+        "--table-disable-docling",
+        action="store_true",
+        help="Disable Docling even if installed when extracting tables.",
+    )
+    parser.add_argument(
+        "--caption-charts",
+        dest="caption_charts",
+        action="store_true",
+        default=True,
+        help="Summarise chart and figure images using the model before answering each task (default: enabled).",
+    )
+    parser.add_argument(
+        "--no-caption-charts",
+        dest="caption_charts",
+        action="store_false",
+        help="Disable chart summarisation before retrieval/answering.",
+    )
+    parser.add_argument(
+        "--chart-caption-prompt",
+        type=str,
+        default=None,
+        help="Override the prompt used when asking the model to interpret charts.",
+    )
+    parser.add_argument(
+        "--chart-to-table-prompt",
+        type=str,
+        default=None,
+        help="Override the JSON table conversion prompt used for chart images.",
+    )
+    parser.add_argument(
+        "--chart-caption-max-images",
+        type=int,
+        default=-1,
+        help="Maximum number of images per page sent to the captioning model (<=0 means no limit).",
+    )
+    parser.add_argument(
+        "--chart-caption-disable-docling",
+        action="store_true",
+        help="Skip Docling extraction when gathering chart images (falls back to full-page renders).",
+    )
+    parser.add_argument(
+        "--parse-cache-dir",
+        type=Path,
+        default=None,
+        help="Directory where parsed page artefacts should be cached across runs (set to empty to disable).",
+    )
+    parser.add_argument(
+        "--no-parse-cache",
+        action="store_true",
+        help="Disable caching of parsed pages and Docling outputs.",
+    )
+    parser.add_argument(
+        "--debug-store-pages",
+        dest="debug_store_pages",
+        action="store_true",
+        help="Persist page-level Markdown representations for debugging.",
+    )
+    parser.add_argument(
+        "--no-debug-store-pages",
+        dest="debug_store_pages",
+        action="store_false",
+        help="Disable page-level Markdown debug output.",
+    )
+    parser.add_argument(
+        "--debug-store-tables",
+        dest="debug_store_tables",
+        action="store_true",
+        help="Persist extracted table Markdown blocks for debugging.",
+    )
+    parser.add_argument(
+        "--no-debug-store-tables",
+        dest="debug_store_tables",
+        action="store_false",
+        help="Disable table Markdown debug output.",
+    )
+    parser.add_argument(
+        "--debug-store-chart-tables",
+        dest="debug_store_chart_tables",
+        action="store_true",
+        help="Persist chart-to-table conversions for debugging.",
+    )
+    parser.add_argument(
+        "--no-debug-store-chart-tables",
+        dest="debug_store_chart_tables",
+        action="store_false",
+        help="Disable chart-to-table debug output.",
+    )
+    parser.add_argument(
+        "--debug-store-captions",
+        dest="debug_store_captions",
+        action="store_true",
+        help="Persist raw model responses from chart interpretation.",
+    )
+    parser.add_argument(
+        "--no-debug-store-captions",
+        dest="debug_store_captions",
+        action="store_false",
+        help="Disable storage of raw chart model responses.",
+    )
+    parser.add_argument(
+        "--debug-store-chunks",
+        dest="debug_store_chunks",
+        action="store_true",
+        help="Persist retrieved chunk payloads (Markdown + metadata) under debug/chunks/.",
+    )
+    parser.add_argument(
+        "--no-debug-store-chunks",
+        dest="debug_store_chunks",
+        action="store_false",
+        help="Disable chunk debug output.",
+    )
+    parser.add_argument(
+        "--debug-store-images",
+        dest="debug_store_images",
+        action="store_true",
+        help="Copy extracted page/chart images into debug/images/ for inspection.",
+    )
+    parser.add_argument(
+        "--no-debug-store-images",
+        dest="debug_store_images",
+        action="store_false",
+        help="Disable image debug output.",
+    )
+    parser.add_argument(
+        "--debug-all",
+        dest="debug_all",
+        action="store",
+        help="Enable save images,charts,tables,captions,pages, in {artifacts}/debug/ folder.",
+    )
+
+    parser.set_defaults(
+        debug_store_pages=None,
+        debug_store_tables=None,
+        debug_store_chart_tables=None,
+        debug_store_captions=None,
+        debug_store_chunks=None,
+        debug_store_images=None,
     )
 
     return parser.parse_args()
@@ -189,6 +380,33 @@ def parse_google_safety_settings(values: list[str] | None) -> list[dict[str, str
         category, threshold = item.split("=", 1)
         settings.append({"category": category.strip(), "threshold": threshold.strip()})
     return settings
+
+
+def parse_key_value_pairs(values: list[str] | None) -> dict[str, object]:
+    pairs: dict[str, object] = {}
+    if not values:
+        return pairs
+    for item in values:
+        if "=" not in item:
+            raise ValueError(f"Invalid option '{item}'. Expected KEY=VALUE format.")
+        key, value = item.split("=", 1)
+        pairs[key.strip()] = _coerce_value(value.strip())
+    return pairs
+
+
+def _coerce_value(value: str) -> object:
+    lowered = value.lower()
+    if lowered in {"true", "false"}:
+        return lowered == "true"
+    try:
+        return int(value)
+    except ValueError:
+        pass
+    try:
+        return float(value)
+    except ValueError:
+        pass
+    return value
 
 
 def build_model(args: argparse.Namespace, artifacts_dir: Path) -> object:
@@ -302,11 +520,51 @@ def main() -> None:
     if hasattr(model, "prepare_dataset"):
         model.prepare_dataset(experiment)
 
+    default_rag_config = LangchainRAGConfig()
+
+    embedding_kwargs = parse_key_value_pairs(args.embedding_option)
+
+    chart_prompt = args.chart_caption_prompt or default_rag_config.chart_caption_prompt
+    chart_to_table_prompt = args.chart_to_table_prompt or default_rag_config.chart_to_table_prompt
+
+    chart_max_images = args.chart_caption_max_images
+    if chart_max_images is not None and chart_max_images <= 0:
+        chart_max_images = None
+
+    parse_cache_dir: Optional[Path]
+    if args.no_parse_cache:
+        parse_cache_dir = None
+    else:
+        parse_cache_dir = args.parse_cache_dir if args.parse_cache_dir is not None else default_rag_config.parse_cache_dir
+
+    debug_store_pages = default_rag_config.debug_store_pages if args.debug_store_pages is None else args.debug_store_pages
+    debug_store_tables = default_rag_config.debug_store_tables if args.debug_store_tables is None else args.debug_store_tables
+    debug_store_chart_tables = (
+        default_rag_config.debug_store_chart_tables
+        if args.debug_store_chart_tables is None
+        else args.debug_store_chart_tables
+    )
+    debug_store_captions = default_rag_config.debug_store_captions if args.debug_store_captions is None else args.debug_store_captions
+    debug_store_chunks = default_rag_config.debug_store_chunks if args.debug_store_chunks is None else args.debug_store_chunks
+    debug_store_images = default_rag_config.debug_store_images if args.debug_store_images is None else args.debug_store_images
+
+    debug_all = args.debug_all or None
+    if debug_all:
+        debug_store_pages = True
+        debug_store_tables = True
+        debug_store_chart_tables = True
+        debug_store_captions = True
+        debug_store_chunks = True
+        debug_store_images = True
+
     rag_config = LangchainRAGConfig(
         chunk_size=args.chunk_size,
         chunk_overlap=args.chunk_overlap,
         top_k=args.top_k,
         embedding_dimension=args.embedding_dimension,
+        embedding_backend=args.embedding_backend,
+        embedding_model=args.embedding_model,
+        embedding_kwargs=embedding_kwargs,
         restrict_to_task_pages=not args.include_all_pages,
         page_padding=args.page_padding,
         use_mmr=args.use_mmr,
@@ -314,6 +572,23 @@ def main() -> None:
         mmr_fetch_k=args.mmr_fetch_k,
         max_context_characters=args.max_context_chars if args.max_context_chars > 0 else None,
         context_separator=args.context_separator,
+        caption_charts=args.caption_charts,
+        chart_caption_prompt=chart_prompt,
+        chart_to_table_prompt=chart_to_table_prompt,
+        chart_caption_max_images=chart_max_images,
+        chart_caption_use_docling=not args.chart_caption_disable_docling,
+        extract_tables=not args.disable_table_extraction,
+        table_use_docling=not args.table_disable_docling,
+        table_row_chunk_size=args.table_row_chunk_size,
+        save_chunks_to_temp=args.save_chunks,
+        chunk_dump_dir=args.chunk_dump_dir,
+        parse_cache_dir=parse_cache_dir,
+        debug_store_pages=debug_store_pages,
+        debug_store_tables=debug_store_tables,
+        debug_store_chart_tables=debug_store_chart_tables,
+        debug_store_captions=debug_store_captions,
+        debug_store_chunks=debug_store_chunks,
+        debug_store_images=debug_store_images,
     )
 
     pipeline = LangchainRAGPipeline(

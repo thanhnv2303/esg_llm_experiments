@@ -1,10 +1,29 @@
 from __future__ import annotations
 
 import hashlib
-from typing import Iterable, List
+from typing import Dict, Iterable, List
 
 import numpy as np
 from langchain_core.embeddings import Embeddings
+
+from .config import LangchainRAGConfig
+
+try:  # pragma: no cover - optional dependency
+    from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore[import-not-found]
+except ImportError:  # pragma: no cover - optional dependency
+    try:
+        from langchain_community.embeddings import (
+            HuggingFaceEmbeddings as _DeprecatedHuggingFaceEmbeddings,
+        )  # type: ignore[assignment]
+    except ImportError:  # pragma: no cover - optional dependency
+        HuggingFaceEmbeddings = None  # type: ignore[assignment]
+    else:  # pragma: no cover - optional dependency
+        HuggingFaceEmbeddings = _DeprecatedHuggingFaceEmbeddings  # type: ignore[assignment]
+
+try:  # pragma: no cover - optional dependency
+    from langchain_openai import OpenAIEmbeddings
+except ImportError:  # pragma: no cover - optional dependency
+    OpenAIEmbeddings = None  # type: ignore[assignment]
 
 
 class HashingEmbeddings(Embeddings):
@@ -47,4 +66,34 @@ def _tokenise(text: str) -> Iterable[str]:
         yield "".join(current)
 
 
-__all__ = ["HashingEmbeddings"]
+def create_embeddings(config: LangchainRAGConfig) -> Embeddings:
+    """Factory that builds an embedding backend based on configuration."""
+
+    backend = (config.embedding_backend or "hash").lower().strip()
+    if backend in {"hash", "hashing"}:
+        return HashingEmbeddings(dimension=config.embedding_dimension)
+
+    kwargs: Dict[str, object] = dict(config.embedding_kwargs)
+
+    if backend in {"huggingface", "hf", "sentence-transformers"}:
+        if HuggingFaceEmbeddings is None:  # pragma: no cover - optional dependency
+            raise RuntimeError(
+                "HuggingFace embeddings requested but 'langchain-community' did not "
+                "have the sentence-transformers extra installed."
+            )
+        model_name = config.embedding_model or "sentence-transformers/all-mpnet-base-v2"
+        return HuggingFaceEmbeddings(model_name=model_name, **kwargs)
+
+    if backend in {"openai", "openai-embeddings", "azure-openai"}:
+        if OpenAIEmbeddings is None:  # pragma: no cover - optional dependency
+            raise RuntimeError(
+                "OpenAI embeddings requested but 'langchain-openai' is not installed."
+            )
+        model_name = config.embedding_model or "text-embedding-3-small"
+        kwargs.setdefault("model", model_name)
+        return OpenAIEmbeddings(**kwargs)
+
+    raise ValueError(f"Unsupported embedding backend '{config.embedding_backend}'.")
+
+
+__all__ = ["HashingEmbeddings", "create_embeddings"]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Sequence
+from typing import List, Sequence
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -14,7 +14,14 @@ def split_documents(documents: Sequence[Document], config: LangchainRAGConfig) -
         chunk_overlap=config.chunk_overlap,
         add_start_index=True,
     )
-    return splitter.split_documents(documents)
+
+    processed: List[Document] = []
+    for doc in documents:
+        if doc.metadata.get("rag_pre_chunked"):
+            processed.append(doc)
+        else:
+            processed.extend(splitter.split_documents([doc]))
+    return processed
 
 
 __all__ = ["split_documents"]

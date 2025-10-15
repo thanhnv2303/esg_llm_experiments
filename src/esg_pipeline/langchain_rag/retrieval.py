@@ -8,19 +8,18 @@ from langchain_community.vectorstores import FAISS
 
 from .config import LangchainRAGConfig
 from .documents import page_one_based
-from .embeddings import HashingEmbeddings
+from .embeddings import create_embeddings
 from .types import RetrievedChunk
 
 
 def build_vector_store(documents: Sequence[Document], config: LangchainRAGConfig) -> FAISS:
-    embeddings = HashingEmbeddings(dimension=config.embedding_dimension)
+    embeddings = create_embeddings(config)
     return FAISS.from_documents(documents, embeddings)
 
 
 def retrieve_chunks(vector_store: FAISS, query: str, config: LangchainRAGConfig) -> List[RetrievedChunk]:
     if not query.strip():
         return []
-
     if config.use_mmr:
         base_docs = vector_store.max_marginal_relevance_search(
             query,
@@ -42,8 +41,10 @@ def chunk_from_document(doc: Document, score: Optional[float]) -> RetrievedChunk
     metadata = dict(doc.metadata)
     page = page_one_based(doc)
     content = doc.page_content.strip()
-    preview = textwrap.shorten(content, width=600, placeholder=" ...")
-    return RetrievedChunk(content=preview, page=page, score=score, metadata=metadata)
+    preview = content
+    if len(content) > 600:
+        preview = textwrap.shorten(content, width=600, placeholder=" ...")
+    return RetrievedChunk(content=content, page=page, score=score, metadata=metadata, preview=preview)
 
 
 __all__ = ["build_vector_store", "retrieve_chunks", "chunk_from_document"]

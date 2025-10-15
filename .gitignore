@@ -187,3 +187,5 @@ artifacts
 configs/rag_anything.json
 local/configs
 output
+temp
+scripts/.rag_cache

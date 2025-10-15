@@ -14,6 +14,7 @@ class RetrievedChunk:
     page: Optional[int]
     score: Optional[float]
     metadata: Dict[str, object] = field(default_factory=dict)
+    preview: Optional[str] = None
 
     def to_dict(self) -> Dict[str, object]:
         payload: Dict[str, object] = {
@@ -26,6 +27,8 @@ class RetrievedChunk:
             payload["metadata"] = {
                 key: serialise_json(value) for key, value in self.metadata.items()
             }
+        if self.preview is not None and self.preview != self.content:
+            payload["preview"] = self.preview
         return payload
 
 

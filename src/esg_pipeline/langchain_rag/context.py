@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, List
+from typing import Iterable, List, Set
 
 from ..config import TaskConfig
 from .config import LangchainRAGConfig
@@ -17,10 +17,13 @@ def build_query(company: str, task: TaskConfig) -> str:
 
 def format_context(chunks: Iterable[RetrievedChunk], config: LangchainRAGConfig) -> str:
     material = list(chunks)
+    if config.top_k and len(material) > config.top_k:
+        material = material[: config.top_k]
     if not material:
         return "No relevant context retrieved."
 
     sections: List[str] = []
+    tables_included: Set[str] = set()
     for index, chunk in enumerate(material, start=1):
         header_bits = [f"Chunk {index}"]
         if chunk.page is not None:
@@ -28,7 +31,16 @@ def format_context(chunks: Iterable[RetrievedChunk], config: LangchainRAGConfig)
         if chunk.score is not None:
             header_bits.append(f"score {chunk.score:.4f}")
         header = " | ".join(header_bits)
-        sections.append(f"## {header}\n{chunk.content.strip()}")
+        body = chunk.content.strip()
+        metadata = chunk.metadata or {}
+        table_id = metadata.get("table_id") if isinstance(metadata.get("table_id"), str) else None
+        full_table = metadata.get("table_full_markdown") if isinstance(metadata.get("table_full_markdown"), str) else None
+        if table_id and full_table:
+            if full_table not in body:
+                if table_id not in tables_included:
+                    body = f"{body}\n\nFull table ({table_id}):\n{full_table.strip()}"
+                    tables_included.add(table_id)
+        sections.append(f"## {header}\n{body}")
 
     context = config.context_separator.join(sections)
     if config.max_context_characters and len(context) > config.max_context_characters:
